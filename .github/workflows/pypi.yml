@@ -1,0 +1,23 @@
+# Upload the wheels and sdist attached to a GitHub release to PyPI (trusted publishing, no token).
+name: pypi
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag whose assets are uploaded"
+        required: true
+        default: "v0.3.1"
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "${{ inputs.tag }}" --repo "${{ github.repository }}" --dir dist --pattern "*.whl" --pattern "*.tar.gz"
+      - run: ls -l dist
+      - uses: pypa/gh-action-pypi-publish@release/v1
