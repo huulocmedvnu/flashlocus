@@ -1,6 +1,6 @@
 #!/bin/bash
-cd /mnt/hdd2/loc-tran/susie_rs/ldbench/chrx
-R=/mnt/hdd2/loc-tran/infertility_work/ref/g1000_eur; B=../../susie-rs/target/release/susiers; P1=/mnt/hdd2/loc-tran/icp_mr/tools/plink; PY=/mnt/hdd2/loc-tran/miniconda3/bin/python
+cd ${BENCH_ROOT:-.}/ldbench/chrx
+R=${REF_1KG}; B=../../susie-rs/target/release/susiers; P1=${PLINK19:-plink}; PY=python
 for id in ANM0236 ANM0237 ANM0238 ANM0239 ANM0240 ANM0241 ANM0242 ANM0001 PCOS0001 ENDO0001; do
   t=${id//[0-9]/}; s=../../real/$t/$id.snps.tsv; [ -f $s ] || continue
   tail -n +2 $s | cut -f1 > w.ids; p=$(wc -l < w.ids); c=$(sed -n 2p $s | cut -f2)

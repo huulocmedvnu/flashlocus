@@ -1,7 +1,7 @@
 #!/bin/bash
 # eQTL Catalogue GTEx SuSiE files, each split into 24 byte ranges fetched in parallel (EBI ~0.4 MB/s per connection)
 set -e
-D=/mnt/hdd2/loc-tran/susie_rs/atlas/eqtl; mkdir -p $D; cd $D
+D=${BENCH_ROOT:-.}/atlas/eqtl; mkdir -p $D; cd $D
 base=http://ftp.ebi.ac.uk/pub/databases/spot/eQTL/susie/QTS000015
 get() {  # url out
   u=$1; o=$2; [ -f $o.ok ] && return

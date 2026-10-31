@@ -1,8 +1,8 @@
 #!/bin/bash
 # LD pilot: same SNP list per window, 48 threads for every tool, wall time per invocation (bim parsing included for all).
-cd /mnt/hdd2/loc-tran/susie_rs; mkdir -p ldbench/pilot; cd ldbench/pilot
-R=/mnt/hdd2/loc-tran/infertility_work/ref/g1000_eur
-B=../../susie-rs/target/release/susiers; P1=/mnt/hdd2/loc-tran/icp_mr/tools/plink; P2=../../tools/plink2/plink2
+cd ${BENCH_ROOT:-.}; mkdir -p ldbench/pilot; cd ldbench/pilot
+R=${REF_1KG}
+B=../../susie-rs/target/release/susiers; P1=${PLINK19:-plink}; P2=../../tools/plink2/plink2
 cat $R.bed $R.bim > /dev/null
 for id in $(awk -F'\t' 'NR>1{print $1"\t"$8}' ../../real/*/prep_summary.tsv | sort -k2,2nr | head -3 | cut -f1); do
   t=${id//[0-9]/}; s=../../real/$t/$id.snps.tsv

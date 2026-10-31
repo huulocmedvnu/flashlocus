@@ -3,7 +3,7 @@ of loci) and single-thread speed (median per-locus time ratio susieR/Rust >= 10,
 import json, os, sys
 import numpy as np, pandas as pd
 
-B = "/mnt/hdd2/loc-tran/susie_rs/bench/res"
+B = os.path.join(os.environ.get("BENCH_ROOT", "."), "bench/res")
 tools = ["rust", "susier", "pysusie_default", "pysusie_exact"]
 T = {t: pd.read_csv(f"{B}/{t}/timing.tsv", sep="\t").set_index("id") for t in tools if os.path.exists(f"{B}/{t}/timing.tsv")}
 ids = T["rust"].index
@@ -39,7 +39,7 @@ for other in [t for t in tools if t != "rust" and t in T]:
                   "cs_identical_share": same / n, "median_time_ratio_vs_rust": float(tt.median()),
                   "total_time_ratio": float(T[other].seconds.sum() / T["rust"].seconds.sum()),
                   "errors": int(T[other].seconds.isna().sum())}
-truth = pd.read_csv("/mnt/hdd2/loc-tran/susie_rs/bench/sim/truth.tsv", sep="\t").set_index("id")
+truth = pd.read_csv(os.path.join(os.environ.get("BENCH_ROOT", "."), "bench/sim/truth.tsv"), sep="\t").set_index("id")
 cov, ncs = 0, 0
 for i in ids:
     c = {int(x) for x in str(truth.loc[i, "causal"]).split(",")}

@@ -1,0 +1,10 @@
+susiers_sym wall 44.05
+susiers_auto wall 11.94
+susieR 0.14.2 loci 396 cores 48 wall_s 448.0949 
+susieR 0.16.6 loci 396 cores 48 wall_s 282.6521 
+pysusie loci 396 cores 48 wall_s 86.82509305188432
+susiers_sym wall 4.79
+susiers_auto wall 1.71
+susieR 0.14.2 loci 200 cores 48 wall_s 71.8468 
+susieR 0.16.6 loci 200 cores 48 wall_s 88.75028 
+pysusie loci 200 cores 48 wall_s 16.36735791200772

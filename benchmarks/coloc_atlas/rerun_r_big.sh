@@ -1,9 +1,9 @@
 #!/bin/bash
 # R rerun for the 3 large tissues: fread decompresses .gz into TMPDIR, and / had only 5.6 GB free, which truncated
-# the input in the first run. TMPDIR now on /mnt/hdd2 (NVMe, same class as /).
-cd /mnt/hdd2/loc-tran/susie_rs/atlas
-export TMPDIR=/mnt/hdd2/loc-tran/susie_rs/atlas/rtmp; mkdir -p $TMPDIR
-E=eqtl; PY=/mnt/hdd2/loc-tran/miniconda3/bin/python
+# the input in the first run. TMPDIR now on the data disk.
+cd ${BENCH_ROOT:-.}/atlas
+export TMPDIR=${BENCH_ROOT:-.}/atlas/rtmp; mkdir -p $TMPDIR
+E=eqtl; PY=python
 cat eqtl/QTD000121* eqtl/QTD000356* eqtl/QTD000116* > /dev/null
 : > logs/r_big.log
 for t in adipose_visceral:QTD000121 blood:QTD000356 adipose_subcut:QTD000116; do n=${t%%:*}; q=${t##*:}

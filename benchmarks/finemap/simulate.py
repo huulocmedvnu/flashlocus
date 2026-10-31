@@ -5,8 +5,8 @@ z = sqrt(n) * R[:, C] @ (s * sqrt(h2/k)) + X' g / sqrt(N), g ~ N(0, I_N), so Cov
 import os, sys, json
 import numpy as np, pandas as pd
 
-REF = "/mnt/hdd2/loc-tran/infertility_work/ref/g1000_eur"
-OUT = "/mnt/hdd2/loc-tran/susie_rs/bench/sim"
+REF = os.environ.get("REF_1KG", "g1000_eur")
+OUT = os.path.join(os.environ.get("BENCH_ROOT", "."), "bench/sim")
 os.makedirs(OUT, exist_ok=True)
 rng = np.random.default_rng(20261031)
 N = 503

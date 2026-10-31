@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use flashLocus, please cite it as below."
+title: "flashLocus: exact and fast fine-mapping, colocalization and linkage disequilibrium in Rust"
+authors:
+  - family-names: Tran
+    given-names: Thai Huu Loc
+    affiliation: Hong Hung Hospital
+    orcid: "https://orcid.org/0009-0009-1810-010X"
+version: 0.3.1
+license: MIT
+repository-code: "https://github.com/huulocmedvnu/flashlocus"

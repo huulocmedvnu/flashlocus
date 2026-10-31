@@ -1,11 +1,11 @@
 #!/bin/bash
 # Final benchmark under the fairness rules in PLAN.md. Single-thread runs pinned to core 2; throughput on 48 cores.
-cd /mnt/hdd2/loc-tran/susie_rs
+cd ${BENCH_ROOT:-.}
 export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMBA_NUM_THREADS=1
-B=/mnt/hdd2/loc-tran/susie_rs/susie-rs/target/release/susiers
-RB=/mnt/hdd2/loc-tran/susie_rs/renv/bin/Rscript
-PY=/mnt/hdd2/loc-tran/miniconda3/bin/python
-L016=/mnt/hdd2/loc-tran/susie_rs/renv_lib016
+B=${BENCH_ROOT:-.}/susie-rs/target/release/susiers
+RB=${BENCH_ROOT:-.}/renv/bin/Rscript
+PY=python
+L016=${BENCH_ROOT:-.}/renv_lib016
 mkdir -p final/logs
 run_set () {   # $1 name, $2 ld manifest, $3 factor manifest
   n=$1; M=$2; MF=$3; o=final/$n

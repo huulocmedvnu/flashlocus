@@ -1,9 +1,9 @@
 #!/bin/bash
 # LD benchmark: 396 real windows, same SNP list per window, one invocation per window per tool, 48 threads each,
 # reference files warm in page cache, wall time includes reading .bim/.bed and writing the p x p binary matrix.
-cd /mnt/hdd2/loc-tran/susie_rs; W=ldbench/full; mkdir -p $W; cd $W
-R=/mnt/hdd2/loc-tran/infertility_work/ref/g1000_eur
-B=../../susie-rs/target/release/susiers; P1=/mnt/hdd2/loc-tran/icp_mr/tools/plink; P2=../../tools/plink2/plink2; PY=/mnt/hdd2/loc-tran/miniconda3/bin/python
+cd ${BENCH_ROOT:-.}; W=ldbench/full; mkdir -p $W; cd $W
+R=${REF_1KG}
+B=../../susie-rs/target/release/susiers; P1=${PLINK19:-plink}; P2=../../tools/plink2/plink2; PY=python
 cat $R.bed $R.bim $R.fam > /dev/null
 echo -e "id\tp\tsusiers_s\tplink19_s\tplink2_s\tmaxdiff_p19\tmaxdiff_p2_abs" > ../ld_times.tsv
 for s in ../../real/*/*.snps.tsv; do

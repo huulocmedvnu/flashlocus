@@ -1,5 +1,5 @@
 # Reference: susieR::susie_rss(z, R, n, L = 10) with defaults; time excludes file I/O.
-if (!grepl("renv", R.home())) .libPaths(c("/mnt/hdd2/loc-tran/susie_rs/Rlib", .libPaths()))
+if (!grepl("renv", R.home())) .libPaths(c("${BENCH_ROOT:-.}/Rlib", .libPaths()))
 if (nzchar(Sys.getenv("SUSIE_LIB"))) .libPaths(c(Sys.getenv("SUSIE_LIB"), .libPaths()))
 cat("BLAS:", sessionInfo()$BLAS, "\n")
 suppressMessages(library(susieR))

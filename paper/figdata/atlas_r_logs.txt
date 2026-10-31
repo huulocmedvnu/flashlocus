@@ -1,0 +1,18 @@
+R atlas uterus: 446 genes, 1800 pairs, load 37.5 s, coloc 3.7 s, total 41.2 s
+R_uterus wall 43.55 s maxrss 3232848 KB
+R atlas ovary: 655 genes, 2510 pairs, load 51.5 s, coloc 5.0 s, total 56.5 s
+R_ovary wall 59.02 s maxrss 4902980 KB
+R atlas vagina: 391 genes, 1534 pairs, load 34.8 s, coloc 4.4 s, total 39.2 s
+R_vagina wall 41.64 s maxrss 3023284 KB
+R atlas adipose_visceral: 1342 genes, 5676 pairs, load 103.7 s, coloc 8.2 s, total 111.9 s
+R_adipose_visceral wall 114.76 s maxrss 15551136 KB
+R atlas blood: 1350 genes, 5340 pairs, load 103.2 s, coloc 6.0 s, total 109.2 s
+R_blood wall 111.96 s maxrss 15423560 KB
+R atlas adipose_subcut: 1122 genes, 4663 pairs, load 108.4 s, coloc 5.9 s, total 114.3 s
+R_adipose_subcut wall 116.81 s maxrss 17411268 KB
+R atlas adipose_visceral: 1479 genes, 6012 pairs, load 113.4 s, coloc 10.9 s, total 124.3 s
+R_adipose_visceral wall 127.09 s maxrss 11202000 KB
+R atlas blood: 1604 genes, 6809 pairs, load 120.8 s, coloc 9.8 s, total 130.6 s
+R_blood wall 133.24 s maxrss 12287736 KB
+R atlas adipose_subcut: 2033 genes, 8494 pairs, load 148.2 s, coloc 9.8 s, total 158.0 s
+R_adipose_subcut wall 160.79 s maxrss 16059456 KB

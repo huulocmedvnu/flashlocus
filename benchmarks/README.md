@@ -4,6 +4,10 @@ Scripts used for the validation and timing reported in the manuscript, run on a 
 server (48 cores, AVX-512). They were run before the rename, so they call the binary `susiers`
 (`../susie-rs/target/release/susiers`); the current binary is `flashlocus` with the same subcommands.
 
+Server paths were replaced by environment variables: `BENCH_ROOT` (working directory of the
+benchmark, default `.`), `REF_1KG` (1000 Genomes EUR PLINK fileset), `PLINK19` (PLINK 1.9 binary) and
+`REPRO_COLOC_TOOLS` (liftOver and chain file used by `prep_keys.py`).
+
 - `finemap/`: phase 1, SuSiE-RSS parity and speed against susieR 0.14.2 / 0.16.6 and pysusie
   (simulated 1000 Genomes EUR loci and 396 real loci from four reproductive GWAS). `run_final.sh` is the
   final fair benchmark (OpenBLAS + Rfast for R, every tool pinned to one core, then 48-core throughput).

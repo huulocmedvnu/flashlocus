@@ -1,0 +1,8 @@
+{
+ "title": "flashLocus: exact and fast fine-mapping, colocalization and linkage disequilibrium in Rust",
+ "upload_type": "software",
+ "license": "MIT",
+ "creators": [{"name": "Tran, Thai Huu Loc", "affiliation": "Hong Hung Hospital", "orcid": "0009-0009-1810-010X"}],
+ "description": "Rust implementation with Python bindings that reproduces susieR 0.14.2 (susie_rss), coloc 5.2.3 (coloc.bf_bf as used by coloc.susie) and PLINK 1.9 genotype correlation. Includes regression tests, benchmark scripts and the data and scripts for the manuscript figures.",
+ "keywords": ["fine-mapping", "colocalization", "linkage disequilibrium", "Sum of Single Effects", "Rust", "human genetics"]
+}

@@ -1,0 +1,7 @@
+tissue	genes	pairs	unaligned_bf2	load_s	coloc_s
+uterus	446	1800	0	4.113	0.503
+ovary	655	2510	0	6.064	0.544
+vagina	391	1534	0	3.238	0.357
+adipose_visceral	1479	6012	0	14.073	0.818
+blood	1604	6809	0	16.111	0.853
+adipose_subcut	2033	8494	0	22.420	1.100

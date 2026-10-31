@@ -6,7 +6,12 @@ LD computation from PLINK 1 binary files.
 
 ## Install
 
-    pip install flashlocus       # command-line tool + Python module (wheels: Linux x86_64/aarch64, macOS)
+Prebuilt wheels (Linux x86_64/aarch64, macOS arm64/x86_64, Python 3.9 or later) are attached to each
+GitHub release:
+
+    pip install flashlocus --find-links https://github.com/huulocmedvnu/flashlocus/releases/expanded_assets/v0.3.1
+
+This installs the Python module and the `flashlocus` command.
 
 From source:
 
@@ -14,7 +19,7 @@ From source:
     cargo test --release         # regression tests against susieR, coloc and PLINK conventions
     pip install maturin && maturin develop --release   # Python module from a checkout
 
-Requires Rust 1.75 or later to build. SIMD kernels: AVX-512 or AVX2 on x86_64 (chosen at run time), NEON on Apple silicon and other aarch64 CPUs. AVX-512 or AVX2 kernels are selected at run time (`flashlocus cpu`).
+Requires Rust 1.75 or later to build. SIMD kernels: AVX-512 or AVX2 on x86_64 (chosen at run time), NEON on Apple silicon and other aarch64 CPUs. The kernel in use is printed by `flashlocus cpu`.
 
 ## Commands
 

@@ -3,8 +3,8 @@ PCOS, FIB, ENDO: GRCh38 position from the source window file by rsid. ANM: hg19 
 UCSC liftOver. Unmapped and duplicated keys are written as NA (they never match a QTL variant)."""
 import os, subprocess, sys
 import pandas as pd
-S = "/mnt/hdd2/loc-tran/susie_rs"
-T = "/mnt/hdd2/loc-tran/repro_coloc/tools"
+S = os.environ.get("BENCH_ROOT", ".")
+T = os.environ.get("REPRO_COLOC_TOOLS", "tools")
 out = f"{S}/atlas/keys"; os.makedirs(out, exist_ok=True)
 rows = []
 for trait in ["PCOS", "FIB", "ENDO", "ANM"]:
