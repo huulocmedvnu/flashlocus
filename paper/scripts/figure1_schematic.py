@@ -71,7 +71,7 @@ text(210, rows[2] + 48, "6 GTEx tissues", size=26)
 # ---- flashLocus modules
 mods = [(ORANGE, "Linkage disequilibrium", "exact integer correlation"),
         (RED, "Fine-mapping", "SuSiE-RSS, as susieR 0.14.2"),
-        (GREEN, "Colocalization", "coloc.susie, as coloc 5.2.3")]
+        (GREEN, "Colocalization", "credible-set pairs, as coloc 5.2.3")]
 for (c, t1, t2), y in zip(mods, rows):
     add(f"<rect x='675' y='{y - 72}' width='450' height='130' rx='14' fill='{c}' fill-opacity='0.10' stroke='{c}' stroke-width='3.5'/>")
     text(900, y - 18, t1, size=30, weight="bold", anchor="middle")
