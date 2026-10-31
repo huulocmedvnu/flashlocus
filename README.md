@@ -14,7 +14,7 @@ From source:
     cargo test --release         # regression tests against susieR, coloc and PLINK conventions
     pip install maturin && maturin develop --release   # Python module from a checkout
 
-Requires Rust 1.75 or later to build. AVX-512 or AVX2 kernels are selected at run time (`flashlocus cpu`).
+Requires Rust 1.75 or later to build. SIMD kernels: AVX-512 or AVX2 on x86_64 (chosen at run time), NEON on Apple silicon and other aarch64 CPUs. AVX-512 or AVX2 kernels are selected at run time (`flashlocus cpu`).
 
 ## Commands
 

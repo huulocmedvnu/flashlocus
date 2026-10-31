@@ -1,5 +1,5 @@
-//! Dot-product kernels with runtime CPU dispatch (AVX-512F, AVX2+FMA, scalar). One binary runs everywhere;
-//! on banhbo (Xeon 8168, Skylake-SP) the AVX-512 path is used.
+//! Dot-product kernels with runtime CPU dispatch (AVX-512F, AVX2+FMA on x86_64; NEON on aarch64, which every
+//! aarch64 CPU has; scalar otherwise). One binary runs everywhere.
 use std::sync::OnceLock;
 #[cfg(target_arch = "x86_64")]
 use std::arch::x86_64::*;
@@ -12,10 +12,12 @@ pub fn level() -> u8 {
             if std::env::var("FLASHLOCUS_NO_AVX512").is_err() && is_x86_feature_detected!("avx512f") { return 2 }
             if is_x86_feature_detected!("avx2") && is_x86_feature_detected!("fma") { return 1 }
         }
+        #[cfg(target_arch = "aarch64")]
+        { if std::env::var("FLASHLOCUS_NO_NEON").is_err() { return 3 } }
         0
     })
 }
-pub fn level_name() -> &'static str { match level() { 2 => "avx512f", 1 => "avx2+fma", _ => "scalar" } }
+pub fn level_name() -> &'static str { match level() { 3 => "neon", 2 => "avx512f", 1 => "avx2+fma", _ => "scalar" } }
 
 #[inline]
 pub fn dot(a: &[f64], b: &[f64]) -> f64 {
@@ -24,6 +26,8 @@ pub fn dot(a: &[f64], b: &[f64]) -> f64 {
     unsafe {
         match level() { 2 => return dot_avx512(a, b), 1 => return dot_avx2(a, b), _ => {} }
     }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return neon::dot(a, b) } }
     dot_scalar(a, b)
 }
 
@@ -34,6 +38,8 @@ pub fn dot_f32(a: &[f32], b: &[f64]) -> f64 {
     unsafe {
         match level() { 2 => return dot_f32_avx512(a, b), 1 => return dot_f32_avx2(a, b), _ => {} }
     }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return neon::dot_f32(a, b) } }
     a.iter().zip(b).map(|(x, y)| *x as f64 * y).sum()
 }
 
@@ -42,12 +48,16 @@ pub fn dot_f32(a: &[f32], b: &[f64]) -> f64 {
 pub fn axpy(a: f64, x: &[f64], y: &mut [f64]) {
     #[cfg(target_arch = "x86_64")]
     unsafe { match level() { 2 => return axpy_avx512(a, x, y), 1 => return axpy_avx2(a, x, y), _ => {} } }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return neon::axpy(a, x, y) } }
     for (yi, xi) in y.iter_mut().zip(x) { *yi += a * xi }
 }
 #[inline]
 pub fn axpy_f32(a: f64, x: &[f32], y: &mut [f64]) {
     #[cfg(target_arch = "x86_64")]
     unsafe { if level() == 2 { return axpy_f32_avx512(a, x, y) } }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return neon::axpy_f32(a, x, y) } }
     for (yi, xi) in y.iter_mut().zip(x) { *yi += a * *xi as f64 }
 }
 #[cfg(target_arch = "x86_64")]
@@ -90,12 +100,16 @@ pub fn lse_parts(x: &[f64]) -> (f64, f64) {
     if !m.is_finite() { return (m, 0.0) }
     #[cfg(target_arch = "x86_64")]
     unsafe { if level() == 2 { return (m, sum_exp_shift_avx512(x, m)) } }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return (m, neon::sum_exp_shift(x, m)) } }
     (m, x.iter().map(|v| (v - m).exp()).sum())
 }
 /// out_j = exp(x_j - m)
 pub fn exp_shift(x: &[f64], m: f64, out: &mut [f64]) {
     #[cfg(target_arch = "x86_64")]
     unsafe { if level() == 2 { return exp_shift_avx512(x, m, out) } }
+    #[cfg(target_arch = "aarch64")]
+    unsafe { if level() == 3 { return neon::exp_shift(x, m, out) } }
     for (o, v) in out.iter_mut().zip(x) { *o = (v - m).exp() }
 }
 #[cfg(target_arch = "x86_64")]
@@ -217,6 +231,100 @@ unsafe fn dot_f32_avx2(a: &[f32], b: &[f64]) -> f64 {
     let mut r = (t[0] + t[1]) + (t[2] + t[3]);
     while i < n { r += *pa.add(i) as f64 * *pb.add(i); i += 1 }
     r
+}
+
+#[cfg(target_arch = "aarch64")]
+mod neon {
+    //! NEON kernels (128-bit, 2 x f64). Eight accumulators hide FMA latency on Apple and Neoverse cores.
+    use std::arch::aarch64::*;
+
+    pub unsafe fn dot(a: &[f64], b: &[f64]) -> f64 {
+        let n = a.len(); let (pa, pb) = (a.as_ptr(), b.as_ptr());
+        let mut acc = [vdupq_n_f64(0.0); 8];
+        let mut i = 0;
+        while i + 16 <= n {
+            for k in 0..8 { acc[k] = vfmaq_f64(acc[k], vld1q_f64(pa.add(i + 2 * k)), vld1q_f64(pb.add(i + 2 * k))) }
+            i += 16;
+        }
+        while i + 2 <= n { acc[0] = vfmaq_f64(acc[0], vld1q_f64(pa.add(i)), vld1q_f64(pb.add(i))); i += 2 }
+        let s01 = vaddq_f64(vaddq_f64(acc[0], acc[1]), vaddq_f64(acc[2], acc[3]));
+        let s23 = vaddq_f64(vaddq_f64(acc[4], acc[5]), vaddq_f64(acc[6], acc[7]));
+        let mut s = vaddvq_f64(vaddq_f64(s01, s23));
+        while i < n { s += *pa.add(i) * *pb.add(i); i += 1 }
+        s
+    }
+
+    pub unsafe fn dot_f32(a: &[f32], b: &[f64]) -> f64 {
+        let n = a.len(); let (pa, pb) = (a.as_ptr(), b.as_ptr());
+        let mut acc = [vdupq_n_f64(0.0); 4];
+        let mut i = 0;
+        while i + 8 <= n {
+            for k in 0..4 { acc[k] = vfmaq_f64(acc[k], vcvt_f64_f32(vld1_f32(pa.add(i + 2 * k))), vld1q_f64(pb.add(i + 2 * k))) }
+            i += 8;
+        }
+        let mut s = vaddvq_f64(vaddq_f64(vaddq_f64(acc[0], acc[1]), vaddq_f64(acc[2], acc[3])));
+        while i < n { s += *pa.add(i) as f64 * *pb.add(i); i += 1 }
+        s
+    }
+
+    pub unsafe fn axpy(a: f64, x: &[f64], y: &mut [f64]) {
+        let n = x.len(); let (px, py) = (x.as_ptr(), y.as_mut_ptr()); let va = vdupq_n_f64(a);
+        let mut i = 0;
+        while i + 8 <= n {
+            for k in 0..4 { let o = i + 2 * k; vst1q_f64(py.add(o), vfmaq_f64(vld1q_f64(py.add(o)), va, vld1q_f64(px.add(o)))) }
+            i += 8;
+        }
+        while i < n { *py.add(i) += a * *px.add(i); i += 1 }
+    }
+
+    pub unsafe fn axpy_f32(a: f64, x: &[f32], y: &mut [f64]) {
+        let n = x.len(); let (px, py) = (x.as_ptr(), y.as_mut_ptr()); let va = vdupq_n_f64(a);
+        let mut i = 0;
+        while i + 2 <= n { vst1q_f64(py.add(i), vfmaq_f64(vld1q_f64(py.add(i)), va, vcvt_f64_f32(vld1_f32(px.add(i))))); i += 2 }
+        while i < n { *py.add(i) += a * *px.add(i) as f64; i += 1 }
+    }
+
+    /// exp(x) for 2 lanes: same range reduction and degree-12 polynomial as the AVX-512 kernel; 2^k applied as
+    /// two factors 2^(k/2) * 2^(k - k/2) so subnormal results (x down to -745) are produced correctly.
+    #[inline(always)]
+    unsafe fn exp_pd(x: float64x2_t) -> float64x2_t {
+        let x = vmaxq_f64(x, vdupq_n_f64(-745.0));
+        let k = vrndnq_f64(vmulq_f64(x, vdupq_n_f64(std::f64::consts::LOG2_E)));
+        let r = vfmsq_f64(x, k, vdupq_n_f64(6.93147180369123816490e-01));
+        let r = vfmsq_f64(r, k, vdupq_n_f64(1.90821492927058770002e-10));
+        const C: [f64; 13] = [1.0, 1.0, 0.5, 1.0 / 6.0, 1.0 / 24.0, 1.0 / 120.0, 1.0 / 720.0, 1.0 / 5040.0, 1.0 / 40320.0,
+                              1.0 / 362880.0, 1.0 / 3628800.0, 1.0 / 39916800.0, 1.0 / 479001600.0];
+        let mut p = vdupq_n_f64(C[12]);
+        for i in (0..12).rev() { p = vfmaq_f64(vdupq_n_f64(C[i]), p, r) }
+        let ki = vcvtq_s64_f64(k);
+        let k1 = vshrq_n_s64::<1>(ki);
+        let k2 = vsubq_s64(ki, k1);
+        let bias = vdupq_n_s64(1023);
+        let f1 = vreinterpretq_f64_s64(vshlq_n_s64::<52>(vaddq_s64(k1, bias)));
+        let f2 = vreinterpretq_f64_s64(vshlq_n_s64::<52>(vaddq_s64(k2, bias)));
+        vmulq_f64(vmulq_f64(p, f1), f2)
+    }
+
+    pub unsafe fn sum_exp_shift(x: &[f64], m: f64) -> f64 {
+        let n = x.len(); let px = x.as_ptr(); let vm = vdupq_n_f64(m);
+        let (mut a0, mut a1) = (vdupq_n_f64(0.0), vdupq_n_f64(0.0));
+        let mut i = 0;
+        while i + 4 <= n {
+            a0 = vaddq_f64(a0, exp_pd(vsubq_f64(vld1q_f64(px.add(i)), vm)));
+            a1 = vaddq_f64(a1, exp_pd(vsubq_f64(vld1q_f64(px.add(i + 2)), vm)));
+            i += 4;
+        }
+        let mut s = vaddvq_f64(vaddq_f64(a0, a1));
+        while i < n { s += (*px.add(i) - m).exp(); i += 1 }
+        s
+    }
+
+    pub unsafe fn exp_shift(x: &[f64], m: f64, out: &mut [f64]) {
+        let n = x.len(); let (px, po) = (x.as_ptr(), out.as_mut_ptr()); let vm = vdupq_n_f64(m);
+        let mut i = 0;
+        while i + 2 <= n { vst1q_f64(po.add(i), exp_pd(vsubq_f64(vld1q_f64(px.add(i)), vm))); i += 2 }
+        while i < n { *po.add(i) = (*px.add(i) - m).exp(); i += 1 }
+    }
 }
 
 #[cfg(test)]

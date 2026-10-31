@@ -1,6 +1,6 @@
 [package]
 name = "flashlocus"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "Fast SuSiE fine-mapping (summary statistics) and coloc in Rust"
 license = "MIT"
