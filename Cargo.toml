@@ -1,0 +1,30 @@
+[package]
+name = "flashlocus"
+version = "0.3.0"
+edition = "2021"
+description = "Fast SuSiE fine-mapping (summary statistics) and coloc in Rust"
+license = "MIT"
+
+[lib]
+name = "flashlocus"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "flashlocus"
+path = "src/main.rs"
+
+[features]
+python = ["dep:pyo3", "dep:numpy"]
+
+[dependencies]
+pyo3 = { version = "0.30", optional = true, features = ["extension-module", "abi3-py39"] }
+numpy = { version = "0.30", optional = true }
+rayon = "1"
+core_affinity = "0.8"
+flate2 = { version = "1", default-features = false, features = ["zlib-rs"] }
+libdeflater = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

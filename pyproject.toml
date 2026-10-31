@@ -1,0 +1,26 @@
+[build-system]
+requires = ["maturin>=1.7,<2"]
+build-backend = "maturin"
+
+[project]
+name = "flashlocus"
+description = "Fast exact SuSiE-RSS fine-mapping, coloc and LD in Rust"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = ["numpy>=1.21"]
+dynamic = ["version"]
+classifiers = [
+  "Programming Language :: Rust",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+
+[project.scripts]
+flashlocus = "flashlocus:main"
+
+[tool.maturin]
+python-source = "python"
+module-name = "flashlocus._core"
+features = ["python"]
